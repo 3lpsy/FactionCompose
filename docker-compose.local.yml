@@ -8,11 +8,11 @@ services:
     environment:
       - API_UPLOAD_DIR=/opt/faction/uploads
       - FLASK_SECRET=changemehunter2
+      - USE_NATIVE_LOGGER=1
       - POSTGRES_HOST=db
       - POSTGRES_DATABASE=faction
       - POSTGRES_USERNAME=postgres
       - POSTGRES_PASSWORD=changemehunter2
-      - POSTGRES_INIT_ON_START=1
       - RABBIT_HOST=mq
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=changemehunter2
@@ -30,7 +30,7 @@ services:
       - ./../API/config.py:/app/config.py
       # - ./../API/Pipfile:/app/Pipfile
       # - ./../API/Pipfile.lock:/app/Pipfile.lock
-      - ./../API/docker_build/logging.conf:/app/logging.conf
+      - ./../API/docker_build/logging.generic.conf:/app/logging.conf
   console:
     build:
       context: ./../Console
@@ -43,12 +43,20 @@ services:
     volumes:
       - ./../Console/dist:/var/www
       - ./../Console/docker_build/nginx.insecure.conf:/etc/nginx/nginx.conf
-
+  # core:
+  #   build:
+  #     context: ./../Core
+  #     dockerfile: ./Dockerfile
+  #   image: faction/core:local
+  #   networks:
+  #     factionpub:
   mq:
     image: rabbitmq:latest
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=changemehunter2
+    ports:
+      - "127.0.0.1:5672:5672"
     networks:
       factionpub:
     logging:
@@ -59,22 +67,24 @@ services:
       - POSTGRES_DB=faction
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=changemehunter2
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      factionpub:
+    # logging:
+    #   driver: none
+  dbui:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=postgres
+      - PGADMIN_DEFAULT_PASSWORD=changemehunter2
+      - PGADMIN_LISTEN_PORT=8888
+    ports:
+      - "127.0.0.1:8888:8888"
     networks:
       factionpub:
     logging:
       driver: none
-  # dbui:
-  #   image: dpage/pgadmin4
-  #   environment:
-  #     - PGADMIN_DEFAULT_EMAIL=postgres
-  #     - PGADMIN_DEFAULT_PASSWORD=changemehunter2
-  #     - PGADMIN_LISTEN_PORT=8888
-  #   ports:
-  #     - "127.0.0.1:8888:8888"
-  #   networks:
-  #     factionpub:
-  #   logging:
-  #     driver: none
 
 networks:
   factionpub:
