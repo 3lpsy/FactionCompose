@@ -6,7 +6,7 @@ services:
       dockerfile: ./Dockerfile
     image: faction/api:local
     environment:
-      - API_UPLOAD_DIR=/opt/faction/uploads
+      - API_UPLOAD_DIR=/tmp/uploads
       - FLASK_SECRET=changemehunter2
       - USE_NATIVE_LOGGER=1
       - POSTGRES_HOST=db
