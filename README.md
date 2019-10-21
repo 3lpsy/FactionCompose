@@ -1,9 +1,8 @@
-Changelog:
 
-- config.py, catch exception
-- rabbit.py, catch exception
+### Firewalld
 
-Requirements:
-
-- docker-run.sh on API to dynamically configure gunicorn
-- npm run dev to build targeting dist for development
+```
+$ firewall-cmd --permanent --zone=trusted --add-interface=factionpub0
+# probably optional
+$ firewall-cmd --permanent --zone=trusted --add-interface=docker0 
+```

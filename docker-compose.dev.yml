@@ -1,0 +1,118 @@
+version: "3.3"
+services:
+  # api:
+  #   build:
+  #     context: ./../API
+  #     dockerfile: ./Dockerfile
+  #   image: faction/api:local
+  #   environment:
+  #     - API_UPLOAD_DIR=/tmp/uploads
+  #     - FLASK_SECRET=changemehunter2
+  #     - USE_NATIVE_LOGGER=1
+  #     - POSTGRES_HOST=db
+  #     - POSTGRES_DATABASE=faction
+  #     - POSTGRES_USERNAME=postgres
+  #     - POSTGRES_PASSWORD=changemehunter2
+  #     - RABBIT_HOST=mq
+  #     - RABBIT_USERNAME=guest
+  #     - RABBIT_PASSWORD=changemehunter2
+  #     - GUNICORN_OPTS=--reload
+  #   ports:
+  #     - "127.0.0.1:5000:5000"
+  #   volumes:
+  #     - ./../API/apis:/app/apis
+  #     - ./../API/backend:/app/backend
+  #     - ./../API/logger:/app/logger
+  #     - ./../API/models:/app/models
+  #     - ./../API/processing:/app/processing
+  #     - ./../API/app.py:/app/app.py
+  #     - ./../API/config.py:/app/config.py
+  #     # - ./../API/Pipfile:/app/Pipfile
+  #     # - ./../API/Pipfile.lock:/app/Pipfile.lock
+  #     - ./../API/docker_build/logging.generic.conf:/app/logging.conf
+  #   networks:
+  #     factionpub:
+  console:
+    build:
+      context: ./../Console
+      dockerfile: ./Dockerfile
+    image: faction/console:local
+    ports:
+      - "127.0.0.1:80:80"
+    volumes:
+      - ./../Console/dist:/var/www
+      - ./../Console/docker_build/nginx.insecure.conf:/etc/nginx/nginx.conf
+    networks:
+      factionpub:
+  core:
+    build:
+      context: ./../Core
+      dockerfile: ./Dockerfile.dev
+      args:
+        - PUBLISH_ENABLED=0
+    image: faction/core:local
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DATABASE=faction
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=changemehunter2
+      - POSTGRES_AUTO_MIGRATE=1
+      - RABBIT_HOST=mq
+      - RABBIT_USERNAME=guest
+      - RABBIT_PASSWORD=changemehunter2
+      - SYSTEM_USERNAME=jim
+      - SYSTEM_PASSWORD=jim
+      - DOCKER_RUN_TARGET=watch
+      - DOCKER_PUBLISH_ON_RUN=1
+    volumes:
+      - ./../Faction.Common/bin:/Faction.Common/bin
+      - ./../Core:/app
+
+    networks:
+      factionpub:
+  mq:
+    image: rabbitmq:latest
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=changemehunter2
+    ports:
+      - "127.0.0.1:5672:5672"
+    logging:
+      driver: none
+    networks:
+      factionpub:
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=faction
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=changemehunter2
+    ports:
+      - "127.0.0.1:5432:5432"
+    # logging:
+    #   driver: none
+    networks:
+      factionpub:
+  dbui:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=postgres
+      - PGADMIN_DEFAULT_PASSWORD=changemehunter2
+      - PGADMIN_LISTEN_PORT=8888
+    ports:
+      - "127.0.0.1:8888:8888"
+    logging:
+      driver: none
+    networks:
+      factionpub:
+
+networks:
+  factionpub:
+    # Use a custom driver
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.30.0/24
+    driver_opts:
+      com.docker.network.bridge.name: factionpub0
