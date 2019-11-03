@@ -7,7 +7,7 @@ services:
     image: faction/api:${COMPOSE_ENV}
     environment:
       # - API_UPLOAD_DIR=/tmp/uploads
-      - FLASK_SECRET=changemehunter2
+      - FLASK_SECRET=changeme
       - USE_NATIVE_LOGGER=1
       - GUNICORN_SERVER=gunicorn
       # - GUNICORN_WORKER_CLASS=eventlet
@@ -17,10 +17,10 @@ services:
       - GUNICORN_TIMEOUT=3
       - POSTGRES_DATABASE=faction
       - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=changemehunter2
+      - POSTGRES_PASSWORD=changeme
       - RABBIT_HOST=mq
       - RABBIT_USERNAME=guest
-      - RABBIT_PASSWORD=changemehunter2
+      - RABBIT_PASSWORD=changeme
     ports:
       - "127.0.0.1:5000:5000"
     volumes:
@@ -59,27 +59,48 @@ services:
       - POSTGRES_HOST=db
       - POSTGRES_DATABASE=faction
       - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=changemehunter2
+      - POSTGRES_PASSWORD=changeme
       - POSTGRES_AUTO_MIGRATE=1
+      - POSTGRES_AUTO_SEED=1
       - RABBIT_HOST=mq
       - RABBIT_USERNAME=guest
-      - RABBIT_PASSWORD=changemehunter2
+      - RABBIT_PASSWORD=changeme
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin
       - SYSTEM_USERNAME=jim
       - SYSTEM_PASSWORD=jim
       - DOCKER_RUN_TARGET=watch
       - DOCKER_PUBLISH_ON_RUN=1
+      - EXTERNAL_ADDRESS=http://127.0.0.1:5000
       - API_UPLOAD_DIR=/tmp/faction 
     volumes:
       - ${FACTION_DIR}/Faction.Common/bin:/Faction.Common/bin
       - ${FACTION_DIR}/Core:/app
-
+    networks:
+      factionpub:
+  build-dotnet:
+    build:
+      context: ${FACTION_DIR}/Build-Service-Dotnet
+      dockerfile: ./Dockerfile
+    image: faction/build-dotnet:${COMPOSE_ENV}
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DATABASE=faction
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=changeme
+      - RABBIT_HOST=mq
+      - RABBIT_USERNAME=guest
+      - RABBIT_PASSWORD=changeme
+      # required to satisfy an env config
+      - SYSTEM_USERNAME=jim
+      - SYSTEM_PASSWORD=jim
     networks:
       factionpub:
   mq:
     image: rabbitmq:latest
     environment:
       - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=changemehunter2
+      - RABBITMQ_DEFAULT_PASS=changeme
     ports:
       - "127.0.0.1:5672:5672"
     logging:
@@ -91,7 +112,7 @@ services:
     environment:
       - POSTGRES_DB=faction
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=changemehunter2
+      - POSTGRES_PASSWORD=changeme
     ports:
       - "127.0.0.1:5432:5432"
     # logging:
@@ -102,7 +123,7 @@ services:
     image: dpage/pgadmin4
     environment:
       - PGADMIN_DEFAULT_EMAIL=postgres
-      - PGADMIN_DEFAULT_PASSWORD=changemehunter2
+      - PGADMIN_DEFAULT_PASSWORD=changeme
       - PGADMIN_LISTEN_PORT=8888
     ports:
       - "127.0.0.1:8888:8888"

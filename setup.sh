@@ -35,22 +35,27 @@ if [ ! -d "$_FACTION_DIR" ]; then
     mkdir -p $_FACTION_DIR;
 fi
 
-_REPO_OWNER=${REPO_OWNER:-factionc2}
-_REPO_BASE_URL="${REPO_BASE_URL:-https://github.com/${_REPO_OWNER}}";
-_REPO_PREFIX="${REPO_PREFIX}";
-_REPO_BRANCH="${REPO_BRANCH:-master}";
-
 function setup_repo () {
     repo="$1";
     echo "Setting Up Repo: $repo";
-    repo_source="${_REPO_BASE_URL}/${_REPO_PREFIX}${repo}";
+    _default_repo_owner="factionc2"
+    if [ "$repo" == "Maurader" ]; then 
+        _default_repo_owner="maraudershell";
+    fi
+    _repo_owner=${REPO_OWNER:-$_default_repo_owner}
+    _repo_prefix="${REPO_PREFIX}";
+    _repo_branch="${REPO_BRANCH:-master}";
+    _repo_base_url="${REPO_BASE_URL:-https://github.com/${_repo_owner}}";
+
+    repo_source="${_repo_base_url}/${_repo_prefix}${repo}";
     repo_dest="${_FACTION_DIR}/$repo";
+
     echo "Repo Source: $repo_source"
     echo "Repo Destination: $repo_dest";
-    echo "Repo Branch: ${_REPO_BRANCH}";
+    echo "Repo Branch: ${_repo_branch}";
     if [ ! -d "${repo_dest}/.git" ]; then 
         echo "Cloning Repo...";
-        git clone -b "$_REPO_BRANCH" "$repo_source" "$repo_dest";
+        git clone -b "$_repo_branch" "$repo_source" "$repo_dest";
     else
         echo "Destination already exists. Skipping..";
     fi
@@ -59,7 +64,7 @@ function setup_repo () {
 echo "";
 echo "Setting Up Repos...";
 echo "";
-for repo in API Console Core Faction.Common Build-Service-Dotnet; do
+for repo in API Console Core Faction.Common Build-Service-Dotnet Marauder; do
     setup_repo ${repo}
     echo "";
 done
