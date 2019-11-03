@@ -1,4 +1,20 @@
 
+# About
+
+This is a simple Compose project for managing and starting FactionC2 services. It's currently aimed at development and not delopment. The setup.sh script can be used for easy cloning and setting up new environments for testing. The compose.sh is a simple wrapper to allow for customized file locations. If you want to skip the setup and already have the repos cloned you can just do the following to get started manually:
+
+```
+$ cp target.source.example target.source
+# configure the values appropriately
+# don't run setup.sh if doing this
+```
+
+## Developing
+
+The goal of this project is to create a seamless development environment where changes to files on hosts are automatically propagated to running services inside the container. For example, if you change the API code, gunicorn should refresh. If you change the Core code, dotnet will restart the service. For the Console code, you have to run 'npm run watchdev' within the Console directory in another console, but otherwise, it'll update.
+
+For this reason, the dev compose project makes heavy use of volumes. You will want to familiarze yourself with what volumes are being used and the related Dockerfiles. 
+
 ## Setup
 
 **Please run from inside the Compose directory**
