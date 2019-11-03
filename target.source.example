@@ -1,0 +1,2 @@
+# this will be set and created by setup.sh
+export FACTION_DIR=/path/to/faction/dir
