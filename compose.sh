@@ -3,6 +3,30 @@ set -e;
 
 compose="docker-compose";
 
+function print_usage() {
+     echo "FactionCompose: A Compose Project for FactionC2"
+     echo 'Usage:'
+     echo '    $ ./compose.sh [env] [compose options]'
+     echo ''
+     echo 'Examples:'
+     echo '    $ ./compose.sh dev build --no-cache'
+     echo '    $ ./compose.sh dev down -v '
+     echo '    $ ./compose.sh dev up'
+     echo '    $ ./compose.sh dev fresh'
+     exit 0;
+}
+
+if [ "$1" == "help" ]; then 
+     print_usage;
+     exit 0;
+elif [ "$1" == "--help" ]; then 
+     print_usage;
+     exit 0;
+elif [ "$1" == "-h" ]; then 
+     print_usage;
+     exit 0;
+fi
+
 get_script_dir () {
      SOURCE="${BASH_SOURCE[0]}"
      while [ -h "$SOURCE" ]; do

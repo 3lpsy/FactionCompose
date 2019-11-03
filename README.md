@@ -50,10 +50,15 @@ You can read env.source.example for additional information about options.
 The compose.sh script will pass all options after the env to the docker-compose command.
 
 ```
-$ ./compose.sh [env] [compose options]
-$ ./compose.sh dev build --no-cache
-$ ./compose.sh dev down -v 
-$ ./compose.sh dev up
+FactionCompose: A Compose Project for FactionC2
+Usage:
+    $ ./compose.sh [env] [compose options]
+
+Examples:
+    $ ./compose.sh dev build --no-cache
+    $ ./compose.sh dev down -v 
+    $ ./compose.sh dev up
+    $ ./compose.sh dev fresh
 ```
 
 There is a special command called fresh which is the equivalent of running:
