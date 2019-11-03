@@ -1,2 +1,4 @@
-# this will be set and created by setup.sh
-export FACTION_DIR=/path/to/faction/dir
+# this is the full path to the parent directory that holds all the faction repos
+export FACTION_DIR="/home/user/path/to/faction-meta-directory"
+# this is the full path to this repo
+export COMPOSE_DIR="/home/user/path/to/Compose"
