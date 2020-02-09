@@ -6,7 +6,7 @@ services:
       dockerfile: ./Dockerfile
     image: faction/api:${COMPOSE_ENV}
     environment:
-      # - API_UPLOAD_DIR=/tmp/uploads
+      - API_UPLOAD_DIR=/tmp/uploads
       - FLASK_SECRET=changeme
       - USE_NATIVE_LOGGER=1
       - GUNICORN_SERVER=gunicorn
@@ -36,6 +36,9 @@ services:
       - ${FACTION_DIR}/API/docker_build/logging.generic.conf:/app/logging.conf
     networks:
       factionpub:
+    depends_on:
+      - core
+      - build-dotnet
   console:
     build:
       context: ${FACTION_DIR}/Console
@@ -48,14 +51,24 @@ services:
       - ${FACTION_DIR}/Console/docker_build/nginx.insecure.conf:/etc/nginx/nginx.conf
     networks:
       factionpub:
+    depends_on:
+      - api
+      - core
+      - build-dotnet
   core:
     build:
       context: ${FACTION_DIR}/Core
       dockerfile: ./Dockerfile
+      # Set to 1 if not making changes to Faction.Common
+      # and haven't modified csprof
       args:
         - PUBLISH_ENABLED=0
     image: faction/core:${COMPOSE_ENV}
     environment:
+      # Development options
+      - DOCKER_RUN_TARGET=watch
+      - DOCKER_PUBLISH_ON_RUN=1
+      # Service options
       - POSTGRES_HOST=db
       - POSTGRES_DATABASE=faction
       - POSTGRES_USERNAME=postgres
@@ -65,25 +78,46 @@ services:
       - RABBIT_HOST=mq
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=changeme
+      # Use this user to login to Console
+      - OPERATOR_USERNAME=operator
+      - OPERATOR_PASSWORD=operator
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=admin
-      - SYSTEM_USERNAME=jim
-      - SYSTEM_PASSWORD=jim
-      - DOCKER_RUN_TARGET=watch
-      - DOCKER_PUBLISH_ON_RUN=1
+      # Dont' bother logging in as this user in Console
+      - SYSTEM_USERNAME=system
+      - SYSTEM_PASSWORD=system
       - EXTERNAL_ADDRESS=http://127.0.0.1:5000
-      - API_UPLOAD_DIR=/tmp/faction 
+      - API_UPLOAD_DIR=/tmp/faction
     volumes:
+      # The bin/obj directories are not synced
+      # Sync local Faction.Common if developing Faction.Common
+      # and you have modified csproj
       - ${FACTION_DIR}/Faction.Common/bin:/Faction.Common/bin
-      - ${FACTION_DIR}/Core:/app
+      - ${FACTION_DIR}/Core/Handlers:/app/Handlers
+      - ${FACTION_DIR}/Core/Objects:/app/Objects
+      - ${FACTION_DIR}/Core/FactionCore.csproj:/app/FactionCore.csproj
+      - ${FACTION_DIR}/Core/FactionCore.sln:/app/FactionCore.sln
+      - ${FACTION_DIR}/Core/Program.cs:/app/Program.cs
+      - ${FACTION_DIR}/Core/startup.sh:/opt/startup.sh
     networks:
       factionpub:
+    depends_on:
+      - db
+      - mq
   build-dotnet:
     build:
       context: ${FACTION_DIR}/Build-Service-Dotnet
       dockerfile: ./Dockerfile
+      # Set to 1 if not making changes to Faction.Common
+      # and haven't modified csproj to reference it
+      args:
+        - PUBLISH_ENABLED=0
     image: faction/build-dotnet:${COMPOSE_ENV}
     environment:
+      # Development options
+      - DOCKER_RUN_TARGET=watch
+      - DOCKER_PUBLISH_ON_RUN=1
+      # Service options
       - POSTGRES_HOST=db
       - POSTGRES_DATABASE=faction
       - POSTGRES_USERNAME=postgres
@@ -91,18 +125,40 @@ services:
       - RABBIT_HOST=mq
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=changeme
-      # required to satisfy an env config
-      - SYSTEM_USERNAME=jim
-      - SYSTEM_PASSWORD=jim
+      # required to satisfy an env config (tells common to load from env, not used )
+      - SYSTEM_USERNAME=system
+      - SYSTEM_PASSWORD=system
+    volumes:
+      # The bin/obj directories are not synced
+      # Sync local Faction.Common if developing Faction.Common
+      # and you have modified csproj
+      - ${FACTION_DIR}/Faction.Common/bin:/Faction.Common/bin
+      - ${FACTION_DIR}/Build-Service-Dotnet/Handlers:/app/Handlers
+      - ${FACTION_DIR}/Build-Service-Dotnet/Objects:/app/Objects
+      - ${FACTION_DIR}/Build-Service-Dotnet/dotnet-build.csproj:/app/dotnet-build.csproj
+      - ${FACTION_DIR}/Build-Service-Dotnet/Program.cs:/app/Program.cs
+      - ${FACTION_DIR}/Build-Service-Dotnet/Loaders.cs:/app/Loaders.cs
+      - ${FACTION_DIR}/Build-Service-Dotnet/Settings.cs:/app/Settings.cs
+      - ${FACTION_DIR}/Build-Service-Dotnet/Scripts/startup.sh:/opt/startup.sh
+      # The build server requires these repos in order to populate
+      # relavent data in database and build associated artifacts
+      - ${FACTION_DIR}/Marauder:/opt/faction/agents/Marauder
+      - ${FACTION_DIR}/Modules-Dotnet:/opt/faction/modules/dotnet
     networks:
       factionpub:
+    depends_on:
+      - db
+      - mq
+      - core
   mq:
-    image: rabbitmq:latest
+    image: rabbitmq:management
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=changeme
     ports:
       - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672" # webui
+    # Comment out two lines to see logs, uncomment to hide
     logging:
       driver: none
     networks:
@@ -115,22 +171,25 @@ services:
       - POSTGRES_PASSWORD=changeme
     ports:
       - "127.0.0.1:5432:5432"
-    # logging:
-    #   driver: none
+    logging:
+      driver: none
     networks:
       factionpub:
   dbui:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:4.15
     environment:
       - PGADMIN_DEFAULT_EMAIL=postgres
       - PGADMIN_DEFAULT_PASSWORD=changeme
       - PGADMIN_LISTEN_PORT=8888
     ports:
       - "127.0.0.1:8888:8888"
+    # Comment out below two lines to get dbui logs in stdout
     logging:
       driver: none
     networks:
       factionpub:
+    depends_on:
+      - db
 
 networks:
   factionpub:

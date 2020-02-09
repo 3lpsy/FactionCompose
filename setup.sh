@@ -64,7 +64,7 @@ function setup_repo () {
 echo "";
 echo "Setting Up Repos...";
 echo "";
-for repo in API Console Core Faction.Common Build-Service-Dotnet Marauder; do
+for repo in API Console Core Faction.Common Build-Service-Dotnet Marauder Modules-Dotnet; do
     setup_repo ${repo}
     echo "";
 done
