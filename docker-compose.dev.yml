@@ -47,7 +47,10 @@ services:
     ports:
       - "127.0.0.1:80:80"
     volumes:
-      - ${FACTION_DIR}/Console/dist:/var/www
+      # This mount assumes you are running 'npm run watchdev' on the host as the
+      # generated build will be synced into the nginx web root directory. Uncomment
+      # to use the pre-built front-end.
+      # - ${FACTION_DIR}/Console/dist:/var/www
       - ${FACTION_DIR}/Console/docker_build/nginx.insecure.conf:/etc/nginx/nginx.conf
     networks:
       factionpub:
