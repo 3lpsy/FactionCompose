@@ -26,7 +26,7 @@ $ cp env.source.example env.source
 
 Next, open env.source in a text editor and modify or remove the relevant variables.
 
-By default, it will assume the parent of the current directory is the target. You can Specify a target directory to clone repos into with the following:
+By default, it will assume the parent of the current directory is the target (FACTION_DIR). You can Specify a target directory to clone repos into with the following:
 
 ```
 # using environment variables
@@ -56,7 +56,7 @@ You can read env.source.example for additional information about options.
 
 ## Running
 
-The compose.sh script will pass all options after the env to the docker-compose command.
+The compose.sh script will pass all options after the env to the docker-compose command. The docker-compose.ENV_NAME.yml file has to exist.
 
 ```
 FactionCompose: A Compose Project for FactionC2
