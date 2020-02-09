@@ -6,7 +6,7 @@ services:
       dockerfile: ./Dockerfile
     image: faction/api:${COMPOSE_ENV}
     environment:
-      - API_UPLOAD_DIR=/tmp/uploads
+      - API_UPLOAD_DIR=/opt/faction/uploads
       - FLASK_SECRET=changeme
       - USE_NATIVE_LOGGER=1
       - GUNICORN_SERVER=gunicorn
@@ -14,7 +14,7 @@ services:
       - GUNICORN_RELOAD=1
       - GUNICORN_DEBUG=1
       - POSTGRES_HOST=db
-      - GUNICORN_TIMEOUT=3
+      - GUNICORN_TIMEOUT=10
       - POSTGRES_DATABASE=faction
       - POSTGRES_USERNAME=postgres
       - POSTGRES_PASSWORD=changeme
@@ -86,13 +86,15 @@ services:
       # Dont' bother logging in as this user in Console
       - SYSTEM_USERNAME=system
       - SYSTEM_PASSWORD=system
-      - EXTERNAL_ADDRESS=http://127.0.0.1:5000
-      - API_UPLOAD_DIR=/tmp/faction
+      - EXTERNAL_ADDRESS=http://api:5000
+      # Not used as of now, only used to satisfy Utility requirements for
+      # environment variables
+      - API_UPLOAD_DIR=/opt/faction/uploads
     volumes:
       # The bin/obj directories are not synced
       # Sync local Faction.Common if developing Faction.Common
       # and you have modified csproj
-      - ${FACTION_DIR}/Faction.Common/bin:/Faction.Common/bin
+      # - ${FACTION_DIR}/Faction.Common/bin:/Faction.Common/bin
       - ${FACTION_DIR}/Core/Handlers:/app/Handlers
       - ${FACTION_DIR}/Core/Objects:/app/Objects
       - ${FACTION_DIR}/Core/FactionCore.csproj:/app/FactionCore.csproj
@@ -132,7 +134,7 @@ services:
       # The bin/obj directories are not synced
       # Sync local Faction.Common if developing Faction.Common
       # and you have modified csproj
-      - ${FACTION_DIR}/Faction.Common/bin:/Faction.Common/bin
+      # - ${FACTION_DIR}/Faction.Common/bin:/Faction.Common/bin
       - ${FACTION_DIR}/Build-Service-Dotnet/Handlers:/app/Handlers
       - ${FACTION_DIR}/Build-Service-Dotnet/Objects:/app/Objects
       - ${FACTION_DIR}/Build-Service-Dotnet/dotnet-build.csproj:/app/dotnet-build.csproj
@@ -190,7 +192,19 @@ services:
       factionpub:
     depends_on:
       - db
-
+  # agentdebug:
+  #   image: mono:6
+  #   # I'm a bad person
+  #   command: /bin/sleep 100000
+  #   volumes:
+  #     - ${FACTION_DIR}/Compose/shared:/opt/shared
+  #   logging:
+  #     driver: none
+  #   networks:
+  #     factionpub:
+  #   depends_on:
+  #     - core
+  #     - build-dotnet
 networks:
   factionpub:
     # Use a custom driver

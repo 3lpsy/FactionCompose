@@ -1,3 +1,7 @@
 target.source
 env.source
 todo.md
+# shared/uploads/files/*
+# !shared/uploads/files/.gitkeep
+# shared/uploads/payloads/*
+# !shared/uploads/payloads/.gitkeep

@@ -63,7 +63,7 @@ if [ ! -f "${COMPOSE_DIR}/docker-compose.${env}.yml" ]; then
      exit 1;
 fi
 
-compose="$compose -f docker-compose.${env}.yml"
+compose="$compose -p faction -f docker-compose.${env}.yml"
 
 export COMPOSE_ENV="$env";
 
