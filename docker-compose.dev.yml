@@ -82,10 +82,10 @@ services:
       - RABBIT_USERNAME=guest
       - RABBIT_PASSWORD=changeme
       # Use this user to login to Console
-      - OPERATOR_USERNAME=operator
-      - OPERATOR_PASSWORD=operator
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=admin
+      - OPERATOR_USERNAME=operator
+      - OPERATOR_PASSWORD=operator
       # Dont' bother logging in as this user in Console
       - SYSTEM_USERNAME=system
       - SYSTEM_PASSWORD=system
