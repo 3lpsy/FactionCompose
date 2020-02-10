@@ -42,9 +42,10 @@ function setup_repo () {
     if [ "$repo" == "Maurader" ]; then 
         _default_repo_owner="maraudershell";
     fi
+    _default_repo_branch=master
     _repo_owner=${REPO_OWNER:-$_default_repo_owner}
     _repo_prefix="${REPO_PREFIX}";
-    _repo_branch="${REPO_BRANCH:-master}";
+    _repo_branch="${REPO_BRANCH:-$_default_repo_branch}";
     _repo_base_url="${REPO_BASE_URL:-https://github.com/${_repo_owner}}";
 
     repo_source="${_repo_base_url}/${_repo_prefix}${repo}";
@@ -52,6 +53,9 @@ function setup_repo () {
 
     echo "Repo Source: $repo_source"
     echo "Repo Destination: $repo_dest";
+    if [ "$repo" == "Docs" ]; then 
+        _repo_branch="master";
+    fi
     echo "Repo Branch: ${_repo_branch}";
     if [ ! -d "${repo_dest}/.git" ]; then 
         echo "Cloning Repo...";
@@ -64,7 +68,7 @@ function setup_repo () {
 echo "";
 echo "Setting Up Repos...";
 echo "";
-for repo in API Console Core Faction.Common Build-Service-Dotnet Marauder Modules-Dotnet; do
+for repo in API Console Core Faction.Common Build-Service-Dotnet Marauder Modules-Dotnet Docs; do
     setup_repo ${repo}
     echo "";
 done
